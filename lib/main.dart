@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void
-main() => runApp(
-  const Inventory(),
-);
+main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox(
+    'usersBox',
+  );
+  runApp(
+    const Inventory(),
+  );
+}
 
 class Inventory
     extends
@@ -23,7 +32,7 @@ class Inventory
         primarySwatch: Colors.red,
         scaffoldBackgroundColor: Colors.white,
       ),
-      initialRoute: '/welcome', // Start from splash screen
+      initialRoute: '/welcome',
       routes: {
         '/welcome':
             (
@@ -68,13 +77,13 @@ class InventoryWelcomeScreen
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Inventory Management System',
+          'Car Rental System',
         ),
-        backgroundColor: Color.fromARGB(
+        backgroundColor: const Color.fromARGB(
           255,
-          169,
-          97,
-          211,
+          50,
+          187,
+          157,
         ),
       ),
       backgroundColor: Colors.white,
@@ -83,41 +92,100 @@ class InventoryWelcomeScreen
           top: 60,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Row just for centering image
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/images/cart.png',
-                  height: 150,
-                  width: 150,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
+              child: Container(
+                height: 280,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(
+                        0.25,
+                      ),
+                      blurRadius: 12,
+                      offset: const Offset(
+                        0,
+                        6,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ),
+                  child: Stack(
+                    children: [
+                      // ✅ IMAGE
+                      Image.asset(
+                        'assets/images/bugati.jfif',
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+
+                      // ✅ DARK GRADIENT AT BOTTOM
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 70,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(
+                                  0.7,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ✅ TEXT INSIDE IMAGE (BOTTOM)
+                      const Positioned(
+                        bottom: 20,
+                        left: 0,
+                        right: 0,
+                        child: Text(
+                          'Rent a Car',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
 
             const SizedBox(
-              height: 20,
+              height: 50,
             ),
 
-            const Text(
-              "Welcome to Inventory App!",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(
-              height: 70,
-            ),
+            // ✅ BUTTON
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(
                   255,
-                  157,
-                  80,
-                  180,
+                  48,
+                  222,
+                  228,
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 80,
@@ -168,6 +236,9 @@ class InventorySignUpScreenState
           InventorySignUpScreen
         > {
   bool _obscureText = true;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(
@@ -219,6 +290,7 @@ class InventorySignUpScreenState
 
               // Name
               TextField(
+                controller: nameController,
                 decoration: InputDecoration(
                   labelText: 'Name',
                   border: OutlineInputBorder(
@@ -235,6 +307,7 @@ class InventorySignUpScreenState
 
               // Email
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(
@@ -251,6 +324,7 @@ class InventorySignUpScreenState
 
               // Password
               TextField(
+                controller: passwordController,
                 obscureText: _obscureText,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -280,11 +354,34 @@ class InventorySignUpScreenState
               // Sign Up button
               ElevatedButton(
                 onPressed: () {
+                  final box = Hive.box(
+                    'usersBox',
+                  );
+
+                  box.put(
+                    emailController.text,
+                    {
+                      'name': nameController.text,
+                      'password': passwordController.text,
+                    },
+                  );
+
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Account Created Successfully',
+                      ),
+                    ),
+                  );
+
                   Navigator.pushReplacementNamed(
                     context,
-                    '',
+                    '/signin',
                   );
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(
@@ -362,6 +459,8 @@ class InventorySignInScreenState
           InventorySignInScreen
         > {
   bool _obscureText = true;
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(
@@ -407,6 +506,7 @@ class InventorySignInScreenState
 
               // Email
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(
@@ -423,6 +523,7 @@ class InventorySignInScreenState
 
               // Password
               TextField(
+                controller: passwordController,
                 obscureText: _obscureText,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -452,11 +553,40 @@ class InventorySignInScreenState
               // Sign In button
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '',
+                  final box = Hive.box(
+                    'usersBox',
                   );
+
+                  final user = box.get(
+                    emailController.text,
+                  );
+
+                  if (user !=
+                          null &&
+                      user['password'] ==
+                          passwordController.text) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Login Successful',
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Invalid Email or Password',
+                        ),
+                      ),
+                    );
+                  }
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(
                     255,
