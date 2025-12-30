@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'car_details_screen.dart';
+import 'booking_history_screen.dart';
 
 void
 main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox(
+    'bookingsBox',
+  );
   await Hive.openBox(
     'usersBox',
   );
@@ -26,7 +31,7 @@ class Inventory
     BuildContext context,
   ) {
     return MaterialApp(
-      title: 'IMS',
+      title: 'CRS',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -574,6 +579,16 @@ class InventorySignInScreenState
                         ),
                       ),
                     );
+                    // ✅ Navigate to Main Screen
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (
+                              _,
+                            ) => CarListScreen(),
+                      ),
+                    );
                   } else {
                     ScaffoldMessenger.of(
                       context,
@@ -644,6 +659,234 @@ class InventorySignInScreenState
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class CarListScreen
+    extends
+        StatelessWidget {
+  CarListScreen({
+    super.key,
+  });
+
+  // 🔹 Hardcoded car data
+  final List<
+    Map<
+      String,
+      dynamic
+    >
+  >
+  cars = [
+    {
+      'name': 'Toyotta Corolla',
+      'price': 1500,
+      'image': 'assets/images/corolla.jfif',
+    },
+    {
+      'name': 'Suzuki Cultus',
+      'price': 300,
+      'image': 'assets/images/cultus.jfif',
+    },
+    {
+      'name': 'Honda City',
+      'price': 700,
+      'image': 'assets/images/hondacity.jfif',
+    },
+    {
+      'name': 'Honda Civic',
+      'price': 900,
+      'image': 'assets/images/hondacivic.jfif',
+    },
+    {
+      'name': 'Suzuki Mehran',
+      'price': 300,
+      'image': 'assets/images/mehran.jfif',
+    },
+    {
+      'name': 'Honda Reborn',
+      'price': 600,
+      'image': 'assets/images/reborn.jfif',
+    },
+    {
+      'name': 'Toyotta Surf',
+      'price': 1200,
+      'image': 'assets/images/surf.jfif',
+    },
+    {
+      'name': 'Toyotta V8',
+      'price': 2000,
+      'image': 'assets/images/v8landcruiser.jfif',
+    },
+    {
+      'name': 'Toyotta Vigo',
+      'price': 1700,
+      'image': 'assets/images/vigo.jfif',
+    },
+    {
+      'name': 'Toyotta Yaris',
+      'price': 500,
+      'image': 'assets/images/yaris.jfif',
+    },
+  ];
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Available Cars',
+        ),
+        backgroundColor: const Color.fromARGB(
+          255,
+          50,
+          187,
+          157,
+        ),
+        centerTitle: true,
+
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.history,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (
+                        _,
+                      ) => BookingHistoryScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+
+      body: ListView.builder(
+        padding: const EdgeInsets.all(
+          16,
+        ),
+        itemCount: cars.length,
+        itemBuilder:
+            (
+              context,
+              index,
+            ) {
+              final car = cars[index];
+
+              return Card(
+                elevation: 5,
+                margin: const EdgeInsets.only(
+                  bottom: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    12,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🔹 Car Image
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(
+                          12,
+                        ),
+                      ),
+                      child: Image.asset(
+                        car['image'],
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(
+                        12,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 🔹 Car Name
+                          Text(
+                            car['name'],
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(
+                            height: 8,
+                          ),
+
+                          // 🔹 Price
+                          Text(
+                            'Rs.${car['price']} per day',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+
+                          const SizedBox(
+                            height: 12,
+                          ),
+
+                          // 🔹 Button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  50,
+                                  187,
+                                  157,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    8,
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (
+                                          context,
+                                        ) => CarDetailsScreen(
+                                          car: car,
+                                        ),
+                                  ),
+                                );
+                              },
+
+                              child: const Text(
+                                'View Details',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
       ),
     );
   }
